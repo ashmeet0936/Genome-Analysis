@@ -1,0 +1,71 @@
+#!/bin/bash -l
+#SBATCH -A uppmax2025-3-3
+#SBATCH -M snowy
+#SBATCH -p core
+#SBATCH -n 4
+#SBATCH -t 06:00:00
+#SBATCH -J htseq_with_cleaning
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=asdo3744@student.uu.se
+#SBATCH --output=%x.%j.out
+
+# Load modules
+module load bioinfo-tools
+module load htseq/2.0.2
+module load python3/3.12.7
+
+# Define paths
+PROKKA_DIR="/home/ashdos28/scripts/prokka_output"
+ALIGNMENTS_DIR="/home/ashdos28/scripts/BWA_TRYOUT"
+HTSEQ_OUTPUT="/home/ashdos28/scripts/HTSEQ"
+
+# Create output directory if it doesn't exist
+mkdir -p "$HTSEQ_OUTPUT"
+
+# Loop through each Prokka bin directory
+for bin_dir in "$PROKKA_DIR"/D*_bin*; do
+    bin_name=$(basename "$bin_dir")
+    gff_file="${bin_dir}/${bin_name}.gff"
+    cleaned_gff="${bin_dir}/${bin_name}.cleaned.gff"
+
+    echo "Processing $bin_name..."
+
+    # Step 1: Verify GFF file exists
+    if [ ! -f "$gff_file" ]; then
+        echo "  GFF file not found: $gff_file. Skipping $bin_name."
+      continue
+    fi
+
+    # Step 2: Clean the GFF to only include CDS features
+    echo "Cleaning GFF file for $bin_name..."
+    awk '$3 == "CDS" || /^#/' "$gff_file" > "$cleaned_gff"
+
+    if [ ! -s "$cleaned_gff" ]; then
+        echo "  Cleaned GFF file is empty or not created: $cleaned_gff. Skipping $bin_name."
+        continue
+    fi
+
+    # Step 3: Run HTSeq-count for both D1 and D3 alignments
+    for origin in D1 D3; do
+        bam_file="${ALIGNMENTS_DIR}/${bin_name}_${origin}_aligned.sorted.bam"
+        htseq_output="${HTSEQ_OUTPUT}/${bin_name}_${origin}_counts.txt"
+
+        # Check BAM file exists
+  if [ ! -f "$bam_file" ]; then
+            echo "  BAM file not found: $bam_file. Skipping ${bin_name}_${origin}."
+            continue
+        fi
+
+        echo "Running HTSeq-count for ${bin_name} using ${origin} alignment..."
+        htseq-count -f bam -r pos -s no -t CDS -i ID "$bam_file" "$cleaned_gff" > "$htseq_output"
+
+        if [ -s "$htseq_output" ]; then
+            echo "  HTSeq-count completed successfully for ${bin_name}_${origin}."
+        else
+            echo "  HTSeq-count failed for ${bin_name}_${origin}."
+        fi
+    done
+
+    echo "Completed $bin_name."
+    echo "---------------------------------"
+done
