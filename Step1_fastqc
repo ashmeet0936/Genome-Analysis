@@ -1,0 +1,19 @@
+#!/bin/bash -l
+#SBATCH -A uppmax2025-3-3
+#SBATCH -M snowy
+#SBATCH -p core
+#SBATCH -n 2
+#SBATCH -t 00:20:00
+#SBATCH -J RNA_trimmed_QC
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user ashmeet-singh.dosanjh.3744@student.uu.se
+#SBATCH --output=%x.%j.out
+
+module load bioinfo-tools
+module load FastQC
+
+fastqc /home/ashdos28/scripts/step2_trim/D1_RNAOX_1_trimmed.fastq.gz \
+       /home/ashdos28/scripts/step2_trim/D1_RNAOX_2_trimmed.fastq.gz \
+       /home/ashdos28/scripts/step2_trim/D3_RNAHO_1_trimmed.fastq.gz \
+       /home/ashdos28/scripts/step2_trim/D3_RNAHO_2_trimmed.fastq.gz \
+       -o RNA_trimmed_qc
