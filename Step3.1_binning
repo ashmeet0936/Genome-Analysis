@@ -1,0 +1,34 @@
+!/bin/bash
+
+#SBATCH -A uppmax2025-3-3            # Account name
+#SBATCH -M snowy                      # Cluster name
+#SBATCH -p core                       # Partition to use (core)
+#SBATCH -n 4                          # Number of CPU cores
+#SBATCH -t 09:00:00                   # Maximum runtime (increase if needed)
+#SBATCH -J metabat2_binning           # Job name
+#SBATCH --mail-type=ALL               # Email notifications for job state changes
+#SBATCH --mail-user=ashmeet-singh.dosanjh.3744@student.uu.se  # Your email address
+#SBATCH --output=%x.%j.out            # Standard output and error (jobname.jobid.out)
+
+# Load necessary modules
+module load bioinfo-tools
+module load MetaBat/2.12.1            # Loading the correct MetaBat2 version
+
+# Define input/output directories and files for D1 and D3
+OUTDIR_D1="/home/ashdos28/scripts/metabat2_out_D1"
+OUTDIR_D3="/home/ashdos28/scripts/metabat2_out_D3"
+D1_CONTIGS="/home/ashdos28/scripts/megahit_outD1/D1_DNAOX.contigs.fa"
+D3_CONTIGS="/home/ashdos28/scripts/megahit_out/D3_DNAHO.contigs.fa"
+
+# Create output directories if they don't exist
+mkdir -p $OUTDIR_D1
+mkdir -p $OUTDIR_D3
+
+# Run MetaBAT2 binning for D1 and D3
+echo "Running MetaBAT2 for D1..."
+metabat2 -i $D1_CONTIGS -o $OUTDIR_D1/D1_binning
+
+echo "Running MetaBAT2 for D3..."
+metabat2 -i $D3_CONTIGS -o $OUTDIR_D3/D3_binning
+
+echo "MetaBAT2 binning completed.
