@@ -1,0 +1,35 @@
+#!/bin/bash -l
+#SBATCH -A uppmax2025-3-3
+#SBATCH -M snowy
+#SBATCH -p core
+#SBATCH -n 6
+#SBATCH -t 08:00:00
+#SBATCH -J checkm_binning_quality
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=asdo3744@student.uu.se
+#SBATCH --output=%x.%j.out
+
+# Load required modules
+module load bioinfo-tools
+module load CheckM/1.0.12
+
+# Input bin directories
+bins_D1="/home/ashdos28/scripts/metabat2_out_D1"
+bins_D3="/home/ashdos28/scripts/metabat2_out_D3"
+
+# Output directories
+out_D1="/home/ashdos28/scripts/checkm_out_D1"
+out_D3="/home/ashdos28/scripts/checkm_out_D3"
+mkdir -p "$out_D1" "$out_D3"
+
+# Run CheckM on D1 bins
+checkm lineage_wf -x fa \
+  "$bins_D1" "$out_D1" \
+  -t 6 -f "$out_D1/checkm_summary.txt"
+
+# Run CheckM on D3 bins
+checkm lineage_wf -x fa \
+  "$bins_D3" "$out_D3" \
+  -t 6 -f "$out_D3/checkm_summary.txt"
+
+echo " CheckM binning quality assessment complete for both D1 and D3."
