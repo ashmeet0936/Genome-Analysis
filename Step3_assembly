@@ -1,0 +1,63 @@
+#!/bin/bash -l
+#SBATCH -A uppmax2025-3-3            # Account name
+#SBATCH -M snowy                      # Cluster name
+#SBATCH -p core                       # Partition to use (core)
+#SBATCH -n 4                          # Number of CPU cores
+#SBATCH -t 12:00:00                   # Maximum runtime (increase if needed)
+#SBATCH -J megahit_assembly_D3           # Job name
+#SBATCH --mail-type=ALL               # Email notifications for job state changes
+#SBATCH --mail-user=ashmeet-singh.dosanjh.3744@student.uu.se  # Your email address
+#SBATCH --output=%x.%j.out            # Standard output and error (jobname.jobid.out)
+
+# Load necessary modules
+module load bioinfo-tools
+module load megahit/1.2.9
+
+# Create output directory if it doesn't exist
+OUTPUT_DIR=/home/ashdos28/scripts
+
+# Debugging: Check the start time
+echo "Start time: $(date)"
+
+# Check the size of input files to ensure they are not empty
+echo "Checking input file sizes..."
+ls -lh /home/ashdos28/Raw_data/D3_DNAHO_1.fastq.gz
+ls -lh /home/ashdos28/Raw_data/D3_DNAHO_2.fastq.gz
+
+# Run the megahit command with parameters
+echo "Running megahit..."
+megahit -1 /home/ashdos28/Raw_data/D3_DNAHO_1.fastq.gz \
+        -2 /home/ashdos28/Raw_data/D3_DNAHO_2.fastq.gz \
+        --k-min 21 \
+        --k-max 121 \
+        --k-step 10 \
+        --min-contig-len 200 \
+        --out-prefix D3_DNAHO \
+# Debugging: Check the start time
+echo "Start time: $(date)"
+
+# Check the size of input files to ensure they are not empty
+echo "Checking input file sizes..."
+ls -lh /home/ashdos28/Raw_data/D3_DNAHO_1.fastq.gz
+ls -lh /home/ashdos28/Raw_data/D3_DNAHO_2.fastq.gz
+
+# Run the megahit command with parameters
+echo "Running megahit..."
+megahit -1 /home/ashdos28/Raw_data/D3_DNAHO_1.fastq.gz \
+        -2 /home/ashdos28/Raw_data/D3_DNAHO_2.fastq.gz \
+        --k-min 21 \
+        --k-max 121 \
+        --k-step 10 \
+        --min-contig-len 200 \
+        --out-prefix D3_DNAHO \
+        --verbose
+
+# Debugging: Check the end time
+echo "End time: $(date)"
+
+# Check if the assembly was successful and print the result
+if [[ $? -eq 0 ]]; then
+  echo "Assembly completed successfully."
+else
+  echo "Assembly failed."
+fi
